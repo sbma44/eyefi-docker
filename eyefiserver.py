@@ -64,7 +64,7 @@ import ConfigParser
 
 import math
 
-DEFAULTS = {'upload_uid': '-1', 'upload_gid': '-1', 'geotag_enable': '0'}
+DEFAULTS = {'geotag_enable': '0'}
 
 """
 General architecture notes
@@ -284,7 +284,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Date', self.date_time_string())
                 self.send_header('Pragma','no-cache')
                 self.send_header('Server','Eye-Fi Agent/2.0.4.0 (Windows XP SP2)')
-                self.send_header('Content-Type','text/xml; charset="utf-8"')
+                self.send_header('Content-Type','text/xml; charset = "utf-8"')
                 self.send_header('Content-Length', contentLength)
                 self.end_headers()
 
@@ -306,7 +306,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Date', self.date_time_string())
                 self.send_header('Pragma','no-cache')
                 self.send_header('Server','Eye-Fi Agent/2.0.4.0 (Windows XP SP2)')
-                self.send_header('Content-Type','text/xml; charset="utf-8"')
+                self.send_header('Content-Type','text/xml; charset = "utf-8"')
                 self.send_header('Content-Length', contentLength)
                 self.end_headers()
 
@@ -326,7 +326,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Date', self.date_time_string())
                 self.send_header('Pragma','no-cache')
                 self.send_header('Server','Eye-Fi Agent/2.0.4.0 (Windows XP SP2)')
-                self.send_header('Content-Type','text/xml; charset="utf-8"')
+                self.send_header('Content-Type','text/xml; charset = "utf-8"')
                 self.send_header('Content-Length', contentLength)
                 self.end_headers()
 
@@ -344,7 +344,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Date', self.date_time_string())
                 self.send_header('Pragma','no-cache')
                 self.send_header('Server','Eye-Fi Agent/2.0.4.0 (Windows XP SP2)')
-                self.send_header('Content-Type','text/xml; charset="utf-8"')
+                self.send_header('Content-Type','text/xml; charset = "utf-8"')
                 self.send_header('Content-Length', contentLength)
                 self.send_header('Connection', 'Close')
                 self.end_headers()
@@ -374,7 +374,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         SOAPElement.appendChild(SOAPBodyElement)
         doc.appendChild(SOAPElement)
 
-        return doc.toxml(encoding="UTF-8")
+        return doc.toxml(encoding = "UTF-8")
 
 
     # Handles receiving the actual photograph from the card.
@@ -385,7 +385,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         postDataInMemoryFile = StringIO.StringIO(postData)
 
         # Get the content-type header which looks something like this
-        # content-type: multipart/form-data; boundary=---------------------------02468ace13579bdfcafebabef00d
+        # content-type: multipart/form-data; boundary = ---------------------------02468ace13579bdfcafebabef00d
         contentTypeHeader = self.headers.getheaders('content-type').pop()
         eyeFiLogger.debug(contentTypeHeader)
 
@@ -393,7 +393,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         headerParameters = contentTypeHeader.split(";")
         eyeFiLogger.debug(headerParameters)
 
-        boundary = headerParameters[-1].split("=")
+        boundary = headerParameters[-1].split(" = ")
         boundary = boundary[1].strip()
         eyeFiLogger.debug("Extracted boundary: " + boundary)
 
@@ -445,10 +445,10 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
             else:
                 timeoffset = time.timezone
             timezone = timeoffset / 60 / 60 * -1
-            imageDate = datetime.fromtimestamp(member.mtime) - timedelta(hours=timezone)
+            imageDate = datetime.fromtimestamp(member.mtime) - timedelta(hours = timezone)
             uploadDir = imageDate.strftime(self.server.config.get('EyeFiServer','upload_dir'))
 
-            f=imageTarfile.extract(member, uploadDir)
+            f = imageTarfile.extract(member, uploadDir)
             imagePath = os.path.join(uploadDir, member.name)
             eyeFiLogger.debug("imagePath " + imagePath)
             os.utime(imagePath, (member.mtime + timeoffset, member.mtime + timeoffset))
@@ -460,9 +460,9 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                     shottime, aps = list(self.parselog(imagePath,imageName))
                     aps = self.getphotoaps(shottime, aps)
                     loc = self.getlocation(aps)
-                    if loc['status']=='OK' and float(loc['accuracy'])<=geotag_accuracy:
-                        xmpName=imageName+".xmp"
-                        xmpPath=os.path.join(uploadDir, xmpName)
+                    if loc['status'] = ='OK' and float(loc['accuracy'])< = geotag_accuracy:
+                        xmpName = imageName+".xmp"
+                        xmpPath = os.path.join(uploadDir, xmpName)
                         eyeFiLogger.debug("Writing XMP file " + xmpPath)
                         self.writexmp(xmpPath,float(loc['location']['lat']),float(loc['location']['lng']))
                         fix_ownership(xmpPath, uid, gid)
@@ -495,7 +495,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         SOAPElement.appendChild(SOAPBodyElement)
         doc.appendChild(SOAPElement)
 
-        return doc.toxml(encoding="UTF-8")
+        return doc.toxml(encoding = "UTF-8")
 
     def parselog(self,logfile,filename):
         shottime = 0
@@ -507,7 +507,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
             if act in ("AP", "NEWAP"):
                 aps.setdefault(args[0], []).append({"time": int(time),"pwr": int(args[1])})
             elif act == "NEWPHOTO":
-                if filename==args[0]:
+                if filename = =args[0]:
                     shottime = int(time)
             elif act == "POWERON":
                 if shottime>0:
@@ -521,7 +521,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         geotag_lag = int(self.server.config.get('EyeFiServer','geotag_lag'))
         newaps = []
         for mac in aps:
-            lag = min([(abs(ap["time"] - time), ap["pwr"]) for ap in aps[mac]], key=lambda a: a[0])
+            lag = min([(abs(ap["time"] - time), ap["pwr"]) for ap in aps[mac]], key = lambda a: a[0])
             if lag[0] <= geotag_lag:
                 newaps.append({"mac": mac, "pwr": lag[1]})
         return newaps
@@ -530,9 +530,9 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         try:
             geourl = 'maps.googleapis.com'
             headers = {"Host": geourl}
-            params = "?browser=none&sensor=false"
+            params = "?browser = none&sensor = false"
             for ap in aps:
-                params+='&wifi=mac:'+'-'.join([ap['mac'][2*d:2*d+2] for d in range(6)])+'|ss:'+str(int(math.log10(ap['pwr']/100.0)*10-50))
+                params+ = '&wifi = mac:'+'-'.join([ap['mac'][2*d:2*d+2] for d in range(6)])+'|ss:'+str(int(math.log10(ap['pwr']/100.0)*10-50))
             conn = httplib.HTTPSConnection(geourl)
             conn.request("GET", "/maps/api/browserlocation/json"+params, "", headers)
             resp = conn.getresponse()
@@ -550,13 +550,13 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         except:
             try:
                 import re
-                result=result.replace("\n"," ")
-                loc={}
-                loc['location']={}
-                loc['location']['lat']=float(re.sub(r'.*"lat"\s*:\s*([\d.]+)\s*[,}\n]+.*',r'\1',result))
-                loc['location']['lng']=float(re.sub(r'.*"lng"\s*:\s*([\d.]+)\s*[,}\n]+.*',r'\1',result))
-                loc['accuracy']=float(re.sub(r'.*"accuracy"\s*:\s*([\d.]+)\s*[,\}\n]+.*',r'\1',result))
-                loc['status']=re.sub(r'.*"status"\s*:\s*"(.*?)"\s*[,}\n]+.*',r'\1',result)
+                result = result.replace("\n"," ")
+                loc = {}
+                loc['location'] = {}
+                loc['location']['lat'] = float(re.sub(r'.*"lat"\s*:\s*([\d.]+)\s*[,}\n]+.*',r'\1',result))
+                loc['location']['lng'] = float(re.sub(r'.*"lng"\s*:\s*([\d.]+)\s*[,}\n]+.*',r'\1',result))
+                loc['accuracy'] = float(re.sub(r'.*"accuracy"\s*:\s*([\d.]+)\s*[,\}\n]+.*',r'\1',result))
+                loc['status'] = re.sub(r'.*"status"\s*:\s*"(.*?)"\s*[,}\n]+.*',r'\1',result)
                 return loc
             except:
                 eyeFiLogger.debug("Geolocation service response contains no coordinates: " + result)
@@ -564,23 +564,23 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
 
     def writexmp(self,name,latitude,longitude):
         if latitude>0:
-            ref="N"
+            ref = "N"
         else:
-            ref="S"
-        latitude=str(abs(latitude)).split('.')
-        latitude[1]=str(float('0.'+latitude[1])*60)
-        latitude=','.join(latitude)+ref
+            ref = "S"
+        latitude = str(abs(latitude)).split('.')
+        latitude[1] = str(float('0.'+latitude[1])*60)
+        latitude = ','.join(latitude)+ref
 
         if longitude>0:
-            ref="E"
+            ref = "E"
         else:
-            ref="W"
-        longitude=str(abs(longitude)).split('.')
-        longitude[1]=str(float('0.'+longitude[1])*60)
-        longitude=','.join(longitude)+ref
+            ref = "W"
+        longitude = str(abs(longitude)).split('.')
+        longitude[1] = str(float('0.'+longitude[1])*60)
+        longitude = ','.join(longitude)+ref
 
         FILE = open(name,"w")
-        FILE.write("<?xpacket begin='\xef\xbb\xbf' id='W5M0MpCehiHzreSzNTczkc9d'?>\n<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='EyeFiServer'>\n<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n<rdf:Description rdf:about='' xmlns:exif='http://ns.adobe.com/exif/1.0/'>\n<exif:GPSLatitude>"+latitude+"</exif:GPSLatitude>\n<exif:GPSLongitude>"+longitude+"</exif:GPSLongitude>\n<exif:GPSVersionID>2.2.0.0</exif:GPSVersionID>\n</rdf:Description>\n</rdf:RDF>\n</x:xmpmeta>\n<?xpacket end='w'?>\n")
+        FILE.write("<?xpacket begin = '\xef\xbb\xbf' id = 'W5M0MpCehiHzreSzNTczkc9d'?>\n<x:xmpmeta xmlns:x = 'adobe:ns:meta/' x:xmptk = 'EyeFiServer'>\n<rdf:RDF xmlns:rdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n<rdf:Description rdf:about = '' xmlns:exif = 'http://ns.adobe.com/exif/1.0/'>\n<exif:GPSLatitude>"+latitude+"</exif:GPSLatitude>\n<exif:GPSLongitude>"+longitude+"</exif:GPSLongitude>\n<exif:GPSVersionID>2.2.0.0</exif:GPSVersionID>\n</rdf:Description>\n</rdf:RDF>\n</x:xmpmeta>\n<?xpacket end = 'w'?>\n")
         FILE.close()
 
     def getPhotoStatus(self,postData):
@@ -613,7 +613,7 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         SOAPElement.appendChild(SOAPBodyElement)
         doc.appendChild(SOAPElement)
 
-        return doc.toxml(encoding="UTF-8")
+        return doc.toxml(encoding = "UTF-8")
 
     def _get_mac_uploadkey_dict(self):
         macs = {}
@@ -701,13 +701,13 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
         doc.appendChild(SOAPElement)
 
 
-        return doc.toxml(encoding="UTF-8")
+        return doc.toxml(encoding = "UTF-8")
 
 def stopEyeFi():
     configfile = sys.argv[2]
     eyeFiLogger.info("Reading config " + configfile)
 
-    config = ConfigParser.SafeConfigParser(defaults=DEFAULTS)
+    config = ConfigParser.SafeConfigParser(defaults = DEFAULTS)
     config.read(configfile)
 
     port = config.getint('EyeFiServer','host_port')
@@ -717,18 +717,18 @@ def stopEyeFi():
     conn.request("QUIT", "/")
     conn.getresponse()
 
-eyeFiServer=''
+eyeFiServer = ''
 
 def runEyeFi():
     configfile = sys.argv[2]
     eyeFiLogger.info("Reading config " + configfile)
 
-    config = ConfigParser.SafeConfigParser(defaults=DEFAULTS)
+    config = ConfigParser.SafeConfigParser(defaults = DEFAULTS)
     config.read(configfile)
 
     # open file logging
     logfile = sys.argv[3]
-    fileHandler = logging.handlers.TimedRotatingFileHandler(logfile, "D", 7, backupCount=7, encoding=None)
+    fileHandler = logging.handlers.TimedRotatingFileHandler(logfile, "D", 7, backupCount = 7, encoding = None)
     fileHandler.setFormatter(eyeFiLoggingFormat)
     eyeFiLogger.addHandler(fileHandler)
 
