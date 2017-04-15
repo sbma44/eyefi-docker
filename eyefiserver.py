@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 """
+Adapted by Tom Lee <thomas.j.lee@gmail.com> (c) 2017.
+Original copyright notice follows:
+
 * Copyright (c) 2009, Jeffrey Tchang
 * Additional *pike
 * All rights reserved.
@@ -59,215 +62,9 @@ import signal
 from datetime import datetime
 import ConfigParser
 
-DEFAULTS = {'upload_uid': '-1', 'upload_gid': '-1', 'geotag_enable': '0'}
-
 import math
 
-class Daemon:
-    """
-    A generic daemon class.
-
-    Usage: subclass the Daemon class and override the run() method
-    """
-    def __init__(self,
-                 pidfile,
-                 stdin='/dev/null',
-                 stdout='/dev/null',
-                 stderr='/dev/null',
-                ):
-        try:
-            self.stderr = sys.argv[3]
-        except:
-            self.stderr = stderr
-        self.stdin = stdin
-        self.stdout = stdout
-        self.pidfile = pidfile
-
-    def daemonize(self):
-        """
-        do the UNIX double-fork magic, see Stevens' "Advanced
-        Programming in the UNIX Environment" for details (ISBN 0201563177)
-        http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16
-        """
-        try:
-            pid = os.fork()
-            if pid > 0:
-                # exit first parent
-#                            sys.exit(0)
-                return 0
-        except OSError, e:
-            sys.stderr.write("fork #1 failed: %d (%s)\n" \
-                             % (e.errno, e.strerror))
-            sys.exit(1)
-
-        # decouple from parent environment
-        os.chdir("/")
-        os.setsid()
-        os.umask(0)
-
-        # do second fork
-        try:
-            pid = os.fork()
-            if pid > 0:
-                # exit from second parent
-#                            sys.exit(0)
-                return 1
-        except OSError, e:
-            sys.stderr.write("fork #2 failed: %d (%s)\n" \
-                             % (e.errno, e.strerror))
-            sys.exit(1)
-
-        # redirect standard file descriptors
-        sys.stdout.flush()
-        sys.stderr.flush()
-        si = file(self.stdin, 'r')
-        so = file(self.stdout, 'a+')
-        se = file(self.stderr, 'a+', 0)
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-
-        # write pidfile
-        atexit.register(self.delpid)
-        pid = str(os.getpid())
-        file(self.pidfile,'w+').write("%s\n" % pid)
-
-    def delpid(self):
-        os.remove(self.pidfile)
-
-    def start(self):
-        """
-        Start the daemon
-        """
-        # Check for a pidfile to see if the daemon already runs
-        try:
-            pf = file(self.pidfile,'r')
-            pid = int(pf.read().strip())
-            pf.close()
-        except IOError:
-            pid = None
-
-        if pid:
-            message = "pidfile %s already exist. Daemon already running?\n"
-            sys.stderr.write(message % self.pidfile)
-            return 1
-
-        # Start the daemon
-        forkresult = self.daemonize()
-        if forkresult==None:
-            self.run()
-        return forkresult
-
-    def stop(self):
-        """
-        Stop the daemon
-        """
-        # Get the pid from the pidfile
-        try:
-            pf = file(self.pidfile,'r')
-            pid = int(pf.read().strip())
-            pf.close()
-        except IOError:
-            pid = None
-
-        if not pid:
-            message = "pidfile %s does not exist. Daemon not running?\n"
-            sys.stderr.write(message % self.pidfile)
-            return 1
-
-        # Try killing the daemon process
-        try:
-            while 1:
-                os.kill(pid, SIGTERM)
-                time.sleep(0.1)
-        except OSError, err:
-            err = str(err)
-            if err.find("No such process") > 0:
-                if os.path.exists(self.pidfile):
-                    os.remove(self.pidfile)
-            else:
-                print str(err)
-                sys.exit(1)
-
-    def restart(self):
-        """
-        Restart the daemon
-        """
-        # Get the pid from the pidfile
-        try:
-            pf = file(self.pidfile,'r')
-            pid = int(pf.read().strip())
-            pf.close()
-        except IOError:
-            pid = None
-
-        if pid:
-        # Try killing the daemon process
-            try:
-                while 1:
-                    os.kill(pid, SIGTERM)
-                    time.sleep(0.1)
-            except OSError, err:
-                err = str(err)
-                if err.find("No such process") > 0:
-                    if os.path.exists(self.pidfile):
-                        os.remove(self.pidfile)
-                else:
-                    print str(err)
-                    return 1
-
-        # Start the daemon
-        forkresult = self.daemonize()
-        if forkresult==None:
-            self.run()
-        return forkresult
-
-    def reload(self):
-        """
-        Reload configuration
-        """
-        # Get the pid from the pidfile
-        try:
-            pf = file(self.pidfile,'r')
-            pid = int(pf.read().strip())
-            pf.close()
-        except IOError:
-            pid = None
-
-        if not pid:
-            message = "pidfile %s does not exist. Daemon not running?\n"
-            sys.stderr.write(message % self.pidfile)
-            return 1
-
-        # Try killing the daemon process
-        try:
-            os.kill(pid, signal.SIGUSR1)
-        except OSError, err:
-            print str(err)
-
-    def status(self):
-        """
-        Check daemon status
-        """
-        # Get the pid from the pidfile
-        try:
-            pf = file(self.pidfile,'r')
-            pid = int(pf.read().strip())
-            pf.close()
-        except IOError:
-            pid = None
-
-        if not pid:
-            message = "pidfile %s does not exist. Daemon not running?\n"
-            sys.stderr.write(message % self.pidfile)
-            return 1
-
-    def run(self):
-        """
-        You should override this method when you subclass Daemon. It will be called after the process has been
-        daemonized by start() or restart().
-        """
-
+DEFAULTS = {'upload_uid': '-1', 'upload_gid': '-1', 'geotag_enable': '0'}
 
 """
 General architecture notes
@@ -279,9 +76,6 @@ This is a standalone Eye-Fi Server that is designed to take the place of the Eye
 Starting this server creates a listener on port 59278. I use the BaseHTTPServer class included
 with Python. I look for specific POST/GET request URLs and execute functions based on those
 URLs.
-
-
-
 
 """
 
@@ -298,12 +92,6 @@ consoleHandler.setFormatter(eyeFiLoggingFormat)
 
 # Append both handlers to the main Eye Fi Server logger
 eyeFiLogger.addHandler(consoleHandler)
-
-
-def fix_ownership(path, uid, gid):
-   if uid != -1 and gid != -1:
-       os.chown(path, uid, gid)
-
 
 # Eye Fi XML SAX ContentHandler
 class EyeFiContentHandler(ContentHandler):
@@ -373,7 +161,6 @@ class EyeFiServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
             eyeFiLogger.error("Error stopping server")
 
     def server_bind(self):
-
         BaseHTTPServer.HTTPServer.server_bind(self)
         self.socket.settimeout(None)
         signal.signal(signal.SIGUSR1, self.reload_config)
@@ -396,14 +183,6 @@ class EyeFiServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
     def stop(self):
         self.run = False
-
-    # alt serve_forever method for python <2.6
-    # because we want a shutdown mech ..
-    #def serve(self):
-    #  while self.run:
-    #    self.handle_request()
-    #  self.socket.close()
-
 
 
 # This class is responsible for handling HTTP requests passed to it.
@@ -486,8 +265,6 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
                 chunk = self.rfile.read(min(chunksize, remain))
                 if not chunk: break
                 mem.write(chunk)
-                print remain
-            print "Finished"
             postData = mem.getvalue()
             mem.close()
 
@@ -637,15 +414,6 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
 
         imageTarfileName = handler.extractedElements["filename"]
 
-        #pike
-        uid = self.server.config.getint('EyeFiServer','upload_uid')
-        gid = self.server.config.getint('EyeFiServer','upload_gid')
-        file_mode = self.server.config.get('EyeFiServer','upload_file_mode')
-        dir_mode = self.server.config.get('EyeFiServer','upload_dir_mode')
-        eyeFiLogger.debug("Using uid/gid %d/%d"%(uid,gid))
-        eyeFiLogger.debug("Using file_mode " + file_mode)
-        eyeFiLogger.debug("Using dir_mode " + dir_mode)
-
         geotag_enable = int(self.server.config.getint('EyeFiServer','geotag_enable'))
         if geotag_enable:
             geotag_accuracy = int(self.server.config.get('EyeFiServer','geotag_accuracy'))
@@ -679,20 +447,11 @@ class EyeFiRequestHandler(BaseHTTPRequestHandler):
             timezone = timeoffset / 60 / 60 * -1
             imageDate = datetime.fromtimestamp(member.mtime) - timedelta(hours=timezone)
             uploadDir = imageDate.strftime(self.server.config.get('EyeFiServer','upload_dir'))
-            eyeFiLogger.debug("Creating folder " + uploadDir)
-            if not os.path.isdir(uploadDir):
-                os.makedirs(uploadDir)
-                fix_ownership(uploadDir, uid, gid)
-                if file_mode != "":
-                    os.chmod(uploadDir, int(dir_mode))
 
             f=imageTarfile.extract(member, uploadDir)
             imagePath = os.path.join(uploadDir, member.name)
             eyeFiLogger.debug("imagePath " + imagePath)
             os.utime(imagePath, (member.mtime + timeoffset, member.mtime + timeoffset))
-            fix_ownership(imagePath, uid, gid)
-            if file_mode != "":
-                os.chmod(imagePath, int(file_mode))
 
             if geotag_enable>0 and member.name.lower().endswith(".log"):
                 eyeFiLogger.debug("Processing LOG file " + imagePath)
@@ -961,7 +720,6 @@ def stopEyeFi():
 eyeFiServer=''
 
 def runEyeFi():
-
     configfile = sys.argv[2]
     eyeFiLogger.info("Reading config " + configfile)
 
@@ -983,48 +741,8 @@ def runEyeFi():
     eyeFiLogger.info("Eye-Fi server started listening on port " + str(server_address[1]))
     eyeFiServer.serve_forever()
 
-class MyDaemon(Daemon):
-    def run(self):
-        runEyeFi()
-
 def main():
-    pid_file = '/tmp/eyefiserver.pid'
-    result = 0
-    if len(sys.argv) > 2:
-        if 'start' == sys.argv[1]:
-            daemon = MyDaemon(pid_file)
-            result = daemon.start()
-            if result!=1:
-                print "EyeFiServer started"
-        elif 'stop' == sys.argv[1]:
-            daemon = MyDaemon(pid_file)
-            result = daemon.stop()
-            if result!=1:
-                print "EyeFiServer stopped"
-        elif 'restart' == sys.argv[1]:
-            daemon = MyDaemon(pid_file)
-            result = daemon.restart()
-            if result!=1:
-                print "EyeFiServer restarted"
-        elif 'reload' == sys.argv[1]:
-            daemon = MyDaemon(pid_file)
-            result = daemon.reload()
-        elif 'status' == sys.argv[1]:
-            daemon = MyDaemon(pid_file)
-            result = daemon.status()
-            if result==1:
-                print "EyeFiServer is not running"
-            else:
-                print "EyeFiServer is running"
-        elif 'instance' == sys.argv[1]:
-            runEyeFi()
-        else:
-            print "Unknown command"
-            sys.exit(2)
-        sys.exit(result)
-    else:
-        print "usage: %s start|stop|restart|reload|status|instance conf_file log_file" % sys.argv[0]
-        sys.exit(2)
+    runEyeFi()
 
 if __name__ == "__main__":
     main()
