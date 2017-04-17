@@ -1,0 +1,39 @@
+[EyeFiServer]
+
+# host name and port to listen on
+# you can leave hostname empty for localhost
+# don't change the port, it will break everything
+
+host_name:
+host_port:59278
+
+# To use this script you need to have your Eye-Fi upload key.
+# You can find it after configuring the card,
+# which you can currently on do on windows or mac
+mac_0:000000000001
+upload_key_0:11111111111111111111111111111111
+
+# Flickr API key & secret
+flickr_enable:1
+flickr_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+flickr_secret:bbbbbbbbbbbbbbbb
+flickr_concurrency:2
+
+# S3 API key & secret - unimplemented
+s3_enable:0
+s3_path:
+s3_access_id:
+s3_secret_key:
+
+# Create XMP file with geolocation information based on access points
+# detected by Eye-Fi card for any uploaded JPEG or RAW file
+geotag_enable:1
+
+# Use acces points detected within this period of time
+# before or after photo was taken, in seconds
+geotag_lag:3600
+
+# Use acquired geolocation data with accuracy over this value, in meters
+geotag_accuracy:140000
+
+upload_dir:/tmp/eyefiserver
