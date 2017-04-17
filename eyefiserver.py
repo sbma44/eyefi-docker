@@ -767,6 +767,7 @@ def runEyeFi():
             flickr_api.set_keys(config.get('EyeFiServer', 'flickr_key'), config.get('EyeFiServer', 'flickr_secret'))
             try:
                 a = flickr_api.auth.AuthHandler.load('./flickr.verifier')
+                flickr_api.set_auth_handler(a)
                 eyeFiLogger.info('loaded Flickr credentials')
             except:
                 a = flickr_api.auth.AuthHandler()
