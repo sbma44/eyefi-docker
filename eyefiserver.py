@@ -218,7 +218,19 @@ def EyeFiRequestHandlerFactory(config, flickr):
                 target = q.get(True)
                 if target is None:
                     break
-                self.flickr.upload(photo_file=target.get('path'), title=target.get('title', datetime.now().isoformat()))
+
+                success = True
+                try:
+                    self.flickr.upload(photo_file=target.get('path'), title=target.get('title', datetime.now().isoformat()))
+                except:
+                    success = False
+
+                if not success:
+                    target['attempts'] = target.get('attempts', 0) + 1
+                    if target['attempts'] < 5:
+                        q.put(target)
+                else:
+                    os.unlink(target.get('path'))
 
         def do_QUIT (self):
             eyeFiLogger.debug("Got StopServer request .. stopping server")
