@@ -221,7 +221,13 @@ def EyeFiRequestHandlerFactory(config, flickr):
 
                 success = True
                 try:
-                    self.flickr.upload(photo_file=target.get('path'), title=target.get('title', datetime.now().isoformat()))
+                    self.flickr.upload(
+                        photo_file=target.get('path'),
+                        title=target.get('title', datetime.now().isoformat())
+                        is_public=self.flickr.is_public,
+                        is_friend=self.flickr.is_friend,
+                        is_family=self.flickr.is_family
+                    )
                 except:
                     success = False
 
@@ -777,6 +783,10 @@ def runEyeFi():
             eyeFiLogger.info('Flickr uploading enabled')
             import flickr_api
             flickr_api.set_keys(config.get('EyeFiServer', 'flickr_key'), config.get('EyeFiServer', 'flickr_secret'))
+            flickr_api.is_public = int(config.get('EyeFiServer','flickr_public'))
+            flickr_api.is_family = int(config.get('EyeFiServer','flickr_family'))
+            flickr_api.is_friend = int(config.get('EyeFiServer','flickr_friend'))
+
             try:
                 a = flickr_api.auth.AuthHandler.load('./flickr.verifier')
                 flickr_api.set_auth_handler(a)
