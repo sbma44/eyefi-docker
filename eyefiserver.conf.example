@@ -18,6 +18,10 @@ flickr_enable:1
 flickr_key:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 flickr_secret:bbbbbbbbbbbbbbbb
 flickr_concurrency:2
+# 1 = yes, 0 = no
+flickr_public:0
+flickr_friends:0
+flickr_family:1
 
 # S3 API key & secret - unimplemented
 s3_enable:0
