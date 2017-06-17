@@ -223,7 +223,7 @@ def EyeFiRequestHandlerFactory(config, flickr):
                 try:
                     self.flickr.upload(
                         photo_file=target.get('path'),
-                        title=target.get('title', datetime.now().isoformat())
+                        title=target.get('title', datetime.now().isoformat()),
                         is_public=self.flickr.is_public,
                         is_friend=self.flickr.is_friend,
                         is_family=self.flickr.is_family
@@ -294,7 +294,6 @@ def EyeFiRequestHandlerFactory(config, flickr):
 
                 # Read contentLength bytes worth of data
                 eyeFiLogger.debug("Attempting to read " + str(contentLength) + " bytes of data")
-                # postData = self.rfile.read(contentLength)
                 try:
                     from StringIO import StringIO
                     import tempfile
