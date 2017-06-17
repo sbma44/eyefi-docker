@@ -1,11 +1,11 @@
-FROM ubuntu:14.04
+FROM armv7/armhf-ubuntu_core:14.04
 
 EXPOSE 59278
 
-RUN mkdir -p /tmp/eyefiserver && \
+RUN bash -c "mkdir -p /tmp/eyefiserver && \
     apt-get update -y && \
-    apt-get install -y python=2.7.5-5ubuntu3 python-setuptools python-pip && \
-    pip install flickr_api
+    apt-get install -y python=2.7.5-5ubuntu3 python-setuptools && \
+    easy_install flickr_api"
 
 ADD eyefiserver.py .
 ADD eyefiserver.conf .
