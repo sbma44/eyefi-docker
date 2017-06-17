@@ -294,7 +294,6 @@ def EyeFiRequestHandlerFactory(config, flickr):
 
                 # Read contentLength bytes worth of data
                 eyeFiLogger.debug("Attempting to read " + str(contentLength) + " bytes of data")
-                # postData = self.rfile.read(contentLength)
                 try:
                     from StringIO import StringIO
                     import tempfile
